@@ -1,11 +1,32 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
 
+// 🔽 import seeds
+import {
+  SEED_THREADS,
+  SEED_MESSAGES,
+  SEED_USER_DIRECTORY,
+} from "../../seeds/chats";
+
 interface ChatListProps {
   isOpen: boolean;
   onToggle: () => void;
+}
+
+const CURRENT_USER_ID = "t1";
+
+// tiny helper
+function timeAgo(iso: string) {
+  const then = new Date(iso).getTime();
+  const mins = Math.floor((Date.now() - then) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} mins`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} h`;
+  const days = Math.floor(hrs / 24);
+  return days === 1 ? "1 day" : `${days} days`;
 }
 
 export default function ChatList({ isOpen, onToggle }: ChatListProps) {
@@ -14,10 +35,62 @@ export default function ChatList({ isOpen, onToggle }: ChatListProps) {
   function toggleDropdownTwo() {
     setIsOpenTwo(!isOpenTwo);
   }
-
   function closeDropdownTwo() {
     setIsOpenTwo(false);
   }
+
+  // Build a list of visible threads for CURRENT_USER_ID
+  const items = useMemo(() => {
+    const myThreads = SEED_THREADS
+      .filter((t) => t.participantIds.includes(CURRENT_USER_ID))
+      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+
+    return myThreads.map((t) => {
+      const lastMsg = SEED_MESSAGES
+        .filter((m) => m.threadId === t.id)
+        .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
+        .at(-1);
+
+      if (t.kind === "dm") {
+        const otherId =
+          t.participantIds.find((id) => id !== CURRENT_USER_ID) ??
+          t.participantIds[0];
+        const u = SEED_USER_DIRECTORY[otherId];
+        return {
+          threadId: t.id,
+          name: u?.displayName ?? "Unknown",
+          subtitle: u?.subtitle ?? "",
+          avatarUrl: u?.avatarUrl ?? "/images/user/user-01.jpg",
+          presence: u?.presence ?? "offline",
+          lastWhen: lastMsg ? timeAgo(lastMsg.sentAt) : "—",
+        };
+      } else {
+        // group
+        const firstOther =
+          t.participantIds.find((id) => id !== CURRENT_USER_ID) ??
+          t.participantIds[0];
+        const u0 = SEED_USER_DIRECTORY[firstOther];
+        return {
+          threadId: t.id,
+          name: t.title || "Group",
+          subtitle: "Group chat",
+          avatarUrl: u0?.avatarUrl ?? "/images/user/user-01.jpg",
+          presence: "online",
+          lastWhen: lastMsg ? timeAgo(lastMsg.sentAt) : "—",
+        };
+      }
+    });
+  }, []);
+
+  const openThread = (threadId: string) => {
+    const url = new URL(window.location.href);
+    url.pathname = "/chat";
+    url.searchParams.set("thread", threadId);
+    window.history.pushState({}, "", url.toString());
+    // notify listeners (ChatBox listens for this)
+    window.dispatchEvent(new Event("locationchange"));
+    if (isOpen) onToggle();
+  };
 
   return (
     <div
@@ -45,13 +118,13 @@ export default function ChatList({ isOpen, onToggle }: ChatListProps) {
             >
               <DropdownItem
                 onItemClick={closeDropdownTwo}
-                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg:white/5 dark:hover:text-gray-300"
+                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
               >
                 View More
               </DropdownItem>
               <DropdownItem
                 onItemClick={closeDropdownTwo}
-                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg:white/5 dark:hover:text-gray-300"
+                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
               >
                 Delete
               </DropdownItem>
@@ -81,230 +154,41 @@ export default function ChatList({ isOpen, onToggle }: ChatListProps) {
 
       <div className="flex flex-col max-h-full px-4 overflow-auto sm:px-5">
         <div className="max-h-full space-y-1 overflow-auto custom-scrollbar">
-          {/* Parent (River) */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-18.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text-white/90">
-                    Ma. Teresa Reyes
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Magulang ni River (G5 – Galatians)
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">15 mins</span>
+          {items.map((c) => (
+            <button
+              key={c.threadId}
+              onClick={() => openThread(c.threadId)}
+              className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left hover:bg-gray-100 dark:hover:bg-white/[0.03]"
+            >
+              <div className="relative h-12 w-full max-w-[48px] rounded-full">
+                <img
+                  src={c.avatarUrl}
+                  alt="profile"
+                  className="object-cover object-center w-full h-full overflow-hidden rounded-full"
+                />
+                <span
+                  className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white dark:border-gray-900 ${
+                    c.presence === "online" ? "bg-success-500" : "bg-error-500"
+                  }`}
+                />
               </div>
-            </div>
-          </div>
-
-          {/* Principal */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-17.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Sir Jose Santos
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Punong-guro (Principal)
-                  </p>
+              <div className="w-full">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      {c.name}
+                    </h5>
+                    <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
+                      {c.subtitle}
+                    </p>
+                  </div>
+                  <span className="text-gray-400 text-theme-xs">
+                    {c.lastWhen}
+                  </span>
                 </div>
-                <span className="text-gray-400 text-theme-xs">30 mins</span>
               </div>
-            </div>
-          </div>
-
-          {/* Adviser G5 */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../.../../images/user/user-19.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Mr. Carlo Dizon
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Adviser • Grade 5 – Galatians
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">45 mins</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Registrar */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-05.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-warning-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Registrar Office
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Admissions &amp; Records
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">2 days</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Parent (Lake) */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-20.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Ms. Liza Dela Cruz
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Magulang ni Lake (G3 – Romans)
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">1 hour</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Finance Office */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-34.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Finance Office
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Tuition &amp; Billing
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">3 days</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Guidance Counselor */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-35.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Ms. Erika Navarro
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Guidance Counselor
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">5 days</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Coach / PE Dept */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-36.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-error-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Coach Bautista
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    PE Department
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">2 hours</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Librarian */}
-          <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg:white/[0.03]">
-            <div className="relative h-12 w-full max-w-[48px] rounded-full">
-              <img
-                src="../../images/user/user-37.jpg"
-                alt="profile"
-                className="object-cover object-center w-full h-full overflow-hidden rounded-full"
-              />
-              <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-            </div>
-            <div className="w-full">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h5 className="text-sm font-medium text-gray-800 dark:text:white/90">
-                    Ms. Hannah Ong
-                  </h5>
-                  <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                    Librarian
-                  </p>
-                </div>
-                <span className="text-gray-400 text-theme-xs">5 days</span>
-              </div>
-            </div>
-          </div>
+            </button>
+          ))}
           {/* End of list */}
         </div>
       </div>

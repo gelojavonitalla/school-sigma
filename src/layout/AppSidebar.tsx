@@ -66,7 +66,7 @@ const navItems: NavItem[] = [
       { name: "Attendance", path: "/demo/teachers/attendance", phase: 4 },
       { name: "Record Grades", path: "/demo/teachers/record", phase: 4 },
       { name: "Make Quiz", path: "/demo/teachers/make-quiz", phase: 4 },
-      { name: "Chat", path: "/demo/chat", phase: 4 },
+      { name: "Chat", path: "/chat", phase: 4 },
     ],
   },
   {

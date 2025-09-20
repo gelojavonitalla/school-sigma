@@ -2,7 +2,7 @@ import ChatList from "./ChatList";
 import ChatHeader from "./ChatHeader";
 import { useState } from "react";
 
-export default function ChatSidebar() {
+export default function ChatSidebar({ activeThreadId }: { activeThreadId: string | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -16,8 +16,8 @@ export default function ChatSidebar() {
         ></div>
       )}
       <div className="flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] xl:flex xl:w-1/4">
-        <ChatHeader onToggle={toggleSidebar} />
-        <ChatList isOpen={isOpen} onToggle={toggleSidebar} />
+        <ChatHeader onToggle={toggleSidebar} activeThreadId={activeThreadId} />
+        <ChatList isOpen={isOpen} onToggle={toggleSidebar} activeThreadId={activeThreadId} />
       </div>
     </>
   );

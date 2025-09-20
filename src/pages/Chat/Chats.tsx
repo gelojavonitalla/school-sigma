@@ -2,8 +2,12 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ChatSidebar from "../../components/chats/ChatSidebar";
 import ChatBox from "../../components/chats/ChatBox";
 import PageMeta from "../../components/common/PageMeta";
+import { useParams } from "react-router";
 
 export default function Chats() {
+  // Accept optional /chat/:threadId param
+  const { threadId } = useParams<{ threadId?: string }>();
+
   return (
     <>
       <PageMeta
@@ -13,13 +17,11 @@ export default function Chats() {
       <PageBreadcrumb pageTitle="Chats" />
       <div className="h-[calc(100vh-150px)] overflow-hidden sm:h-[calc(100vh-174px)]">
         <div className="flex flex-col h-full gap-6 xl:flex-row xl:gap-5">
-          {/* <!-- Chat Sidebar Start --> */}
-          <ChatSidebar />
-          {/* <!-- Chat Sidebar End --> */}
+          {/* Sidebar gets active thread id for highlighting */}
+          <ChatSidebar activeThreadId={threadId ?? null} />
 
-          {/* <!-- Chat Box Start --> */}
+          {/* Chat box loads the thread */}
           <ChatBox />
-          {/* <!-- Chat Box End --> */}
         </div>
       </div>
     </>
