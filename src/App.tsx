@@ -40,6 +40,62 @@ export default function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<ComingSoon />} />
+
+            {/* ---- Future routes (404 placeholders) ---- */}
+            <Route path="/admin" element={<NotFound />} />
+            <Route path="/admin/settings" element={<NotFound />} />
+            <Route path="/admin/settings/tenant" element={<NotFound />} />
+            <Route path="/admin/settings/branding" element={<NotFound />} />
+            <Route path="/admin/settings/roles" element={<NotFound />} />
+            <Route path="/admin/audit-logs" element={<NotFound />} />
+            <Route path="/admin/grade-limits" element={<NotFound />} />
+            <Route path="/admin/reservation-windows" element={<NotFound />} />
+            <Route path="/admin/pricing-rules" element={<NotFound />} />
+
+            <Route path="/accounting" element={<NotFound />} />
+            <Route path="/accounting/enrollment-items" element={<NotFound />} />
+            <Route path="/accounting/bundles" element={<NotFound />} />
+            <Route path="/accounting/assignment" element={<NotFound />} />
+            <Route path="/accounting/reports" element={<NotFound />} />
+
+            <Route path="/finance" element={<NotFound />} />
+            <Route path="/finance/dashboard" element={<NotFound />} />
+            <Route path="/finance/payments" element={<NotFound />} />
+            <Route path="/finance/receipts" element={<NotFound />} />
+            <Route path="/finance/verifications" element={<NotFound />} />
+            <Route path="/finance/reports" element={<NotFound />} />
+            <Route path="/finance/exports" element={<NotFound />} />
+
+            <Route path="/parents" element={<NotFound />} />
+            <Route path="/parents/dashboard" element={<NotFound />} />
+            <Route path="/parents/reservations" element={<NotFound />} />
+            <Route path="/parents/payments" element={<NotFound />} />
+            <Route path="/parents/profile" element={<NotFound />} />
+
+            <Route path="/teachers" element={<NotFound />} />
+            <Route path="/teachers/dashboard" element={<NotFound />} />
+            <Route path="/teachers/taskboard" element={<NotFound />} />
+            <Route path="/teachers/attendance" element={<NotFound />} />
+            <Route path="/teachers/record-grades" element={<NotFound />} />
+            <Route path="/teachers/make-quiz" element={<NotFound />} />
+            <Route path="/teachers/quizzes" element={<NotFound />} />
+
+            <Route path="/students" element={<NotFound />} />
+            <Route path="/students/dashboard" element={<NotFound />} />
+            <Route path="/students/assignments" element={<NotFound />} />
+            <Route path="/students/quiz" element={<NotFound />} />
+            <Route path="/students/quiz/:quizId" element={<NotFound />} />
+
+            <Route path="/devices/kiosk" element={<NotFound />} />
+            <Route path="/devices/reader" element={<NotFound />} />
+
+            <Route path="/reports" element={<NotFound />} />
+            <Route path="/reports/enrollment" element={<NotFound />} />
+            <Route path="/reports/finance" element={<NotFound />} />
+
+            <Route path="/chat" element={<Chats />} />
+            <Route path="/chat/:threadId?" element={<Chats />} />
+
             <Route path="/demo/dashboard" element={<AdminDashboard />} />
             <Route path="/demo/profile" element={<UserProfiles />} />
             <Route path="/demo/tickets" element={<DemoTicketList />} />
@@ -59,7 +115,8 @@ export default function App() {
             <Route path="/demo/parents/reserve" element={<Reservation />} />
             <Route path="/demo/students/quiz" element={<TakeQuiz />} />
             <Route path="/demo/invoices" element={<Invoices />} />
-            <Route path="/demo/chat" element={<Chats />} />
+
+            
           </Route>
 
           {/* Auth Layout */}
