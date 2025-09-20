@@ -8,7 +8,7 @@ import FiveZeroZero from "./pages/OtherPage/FiveZeroZero";
 import FiveZeroThree from "./pages/OtherPage/FiveZeroThree";
 import Invoices from "./pages/Invoices";
 import ComingSoon from "./pages/OtherPage/ComingSoon";
-import Chats from "./pages/Chat/Chats";
+import Chats from "./features/chat/pages/Chats";
 import ResetPassword from "./pages/AuthPages/ResetPassword";
 import TwoStepVerification from "./pages/AuthPages/TwoStepVerification";
 import Success from "./pages/OtherPage/Success";

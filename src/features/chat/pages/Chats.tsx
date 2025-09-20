@@ -1,7 +1,7 @@
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import ChatSidebar from "../../components/chats/ChatSidebar";
-import ChatBox from "../../components/chats/ChatBox";
-import PageMeta from "../../components/common/PageMeta";
+import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
+import ChatSidebar from "../widgets/ChatSidebar";
+import ChatBox from "../widgets/ChatBox";
+import PageMeta from "../../../components/common/PageMeta";
 import { useParams } from "react-router";
 
 export default function Chats() {

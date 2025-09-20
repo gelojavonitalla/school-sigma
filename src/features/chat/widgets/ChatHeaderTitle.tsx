@@ -1,9 +1,9 @@
 // src/components/chats/ChatHeaderTitle.tsx
 import { useState } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
-import { SEED_THREADS, SEED_USER_DIRECTORY } from "../../seeds/chats";
+import { Dropdown } from "../../../components/ui/dropdown/Dropdown";
+import { DropdownItem } from "../../../components/ui/dropdown/DropdownItem";
+import { MoreDotIcon } from "../../../icons";
+import { SEED_THREADS, SEED_USER_DIRECTORY } from "../../../seeds/chats";
 
 type Props = {
   activeThreadId?: string | null;

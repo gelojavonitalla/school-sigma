@@ -7,7 +7,7 @@ import {
   SEED_MESSAGES,
   SEED_THREADS,
   SEED_USER_DIRECTORY,
-} from "../../seeds/chats"; 
+} from "../../../seeds/chats"; 
 
 interface ChatItem {
   id: string | number;

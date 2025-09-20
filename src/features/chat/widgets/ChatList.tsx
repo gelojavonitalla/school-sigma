@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
+import { Dropdown } from "../../../components/ui/dropdown/Dropdown";
+import { DropdownItem } from "../../../components/ui/dropdown/DropdownItem";
+import { MoreDotIcon } from "../../../icons";
 
 // 🔽 import seeds
 import {
   SEED_THREADS,
   SEED_MESSAGES,
   SEED_USER_DIRECTORY,
-} from "../../seeds/chats";
+} from "../../../seeds/chats";
 
 interface ChatListProps {
   isOpen: boolean;
